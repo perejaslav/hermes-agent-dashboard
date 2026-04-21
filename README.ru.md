@@ -1,52 +1,66 @@
 # Hermes Agent Dashboard
 
-Hermes Agent Dashboard — это дашборд на FastAPI + Chart.js в одном Python-файле. Он показывает статистику Hermes-сессий в реальном времени.
+Hermes Agent Dashboard — это небольшой самодостаточный дашборд для уже установленного Hermes Agent.
+Он показывает аналитику сессий, использование токенов, распределение по моделям, инструменты, delegate-вызовы и другие live-метрики.
 
-## Что показывает дашборд
+## Что есть в репозитории
 
-- количество сессий и активность
-- метрики user / assistant / tool / delegate
-- использование токенов: input, output, cache read, total
-- использование токенов по дням и по моделям
-- топ инструментов
-- сессии по длительности и по токенам
-- разбивку Agent vs Subagents
-- двуязычный интерфейс: русский и английский
+- `hermes-dashboard.py` — сервер дашборда и встроенный UI
+- `install.sh` — установка дашборда в существующий Hermes Agent
+- `uninstall.sh` — удаление установленных файлов и systemd-сервиса
+- `hermes-dashboard.service` — шаблон systemd unit, который использует установщик
+- `README.md` — описание на английском
 
-## Источники данных
+## Требования
 
-Дашборд читает данные из локального состояния Hermes:
+Этот дашборд предназначен для человека, у которого уже установлен и работает Hermes Agent локально.
+Ожидается Hermes-окружение вроде:
 
-- `~/.hermes/state.db` — токены и стоимость
-- `~/.hermes/sessions/*.jsonl` — транскрипты и события сессий
-- fallback через `sessions.json`, если он доступен
+- `~/.hermes/state.db`
+- `~/.hermes/sessions/`
+- Python-окружение Hermes Agent на машине
 
-## Возможности
+Отдельный backend или база данных не нужны.
+Дашборд читает локальное состояние Hermes напрямую.
 
-- live-обновления через WebSocket
-- REST API на `/api/stats`
-- фильтр периода: 1 / 3 / 7 / 14 / 30 дней
-- тёмная тема
-- сохранение языка в `localStorage`
-- без сторонней i18n-библиотеки
+## Быстрая установка
 
-## Запуск
+```bash
+git clone https://github.com/perejaslav/hermes-agent-dashboard.git
+cd hermes-agent-dashboard
+sudo ./install.sh
+```
 
-Дашборд запускается как systemd-сервис:
+Если Hermes установлен не в стандартном пути Python, можно указать его явно:
+
+```bash
+HERMES_PYTHON=/path/to/hermes-agent/venv/bin/python3 sudo ./install.sh
+```
+
+## После установки
+
+- имя сервиса: `hermes-dashboard`
+- порт: `8420`
+- адрес: `http://localhost:8420`
+
+Полезные команды:
 
 ```bash
 sudo systemctl status hermes-dashboard
 sudo systemctl restart hermes-dashboard
+sudo journalctl -u hermes-dashboard -n 50
 ```
 
-Порт по умолчанию: `8420`
+## Удаление
 
-## Файлы проекта
+```bash
+sudo ./uninstall.sh
+```
 
-- `hermes-dashboard.py` — сервер дашборда и встроенный UI
-- `README.md` — описание на английском
-- `README.ru.md` — описание на русском
+Это удалит файл дашборда и systemd unit, но не тронет данные Hermes (`state.db`, sessions).
 
-## Примечание
+## Примечания
 
-Дашборд сделан максимально простым в поддержке: один Python-файл, без лишних зависимостей, вся локализация на стороне клиента.
+- Локализация работает на стороне клиента, отдельная i18n-библиотека не нужна.
+- Дашборд — это один Python-файл со встроенными HTML/CSS/JS.
+- Он использует данные Hermes только с локальной машины.

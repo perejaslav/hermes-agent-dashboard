@@ -1,0 +1,8 @@
+*
+!.gitignore
+!README.md
+!README.ru.md
+!hermes-dashboard.py
+!install.sh
+!uninstall.sh
+!hermes-dashboard.service

@@ -1,52 +1,66 @@
 # Hermes Agent Dashboard
 
-Hermes Agent Dashboard is a single-file FastAPI + Chart.js dashboard that shows real-time Hermes session analytics.
+Hermes Agent Dashboard is a small, self-contained dashboard for an existing Hermes Agent installation.
+It shows session analytics, token usage, model distribution, tools, delegates, and other live metrics.
 
-## What it shows
+## What this repo contains
 
-- session count and activity
-- user / assistant / tool / delegate metrics
-- token usage: input, output, cache read, total
-- token usage by day and by model
-- top tools
-- sessions sorted by duration and token usage
-- agent vs subagent breakdown
-- bilingual UI: Russian and English
+- `hermes-dashboard.py` — the dashboard server and embedded UI
+- `install.sh` — installs the dashboard into an existing Hermes Agent setup
+- `uninstall.sh` — removes the installed dashboard files and systemd service
+- `hermes-dashboard.service` — systemd unit template used by the installer
+- `README.ru.md` — Russian documentation
 
-## Data sources
+## Requirements
 
-The dashboard reads data from local Hermes state:
+This dashboard is meant for someone who already has Hermes Agent installed and running locally.
+It expects a Hermes-style environment such as:
 
-- `~/.hermes/state.db` — token and cost statistics
-- `~/.hermes/sessions/*.jsonl` — session transcripts and events
-- legacy `sessions.json` fallback where applicable
+- `~/.hermes/state.db`
+- `~/.hermes/sessions/`
+- Hermes Agent Python environment available on the machine
 
-## Features
+The dashboard does **not** require a separate backend service or database.
+It reads the Hermes local state directly.
 
-- live updates via WebSocket
-- REST API at `/api/stats`
-- period filter: 1 / 3 / 7 / 14 / 30 days
-- dark theme
-- localStorage language persistence
-- no third-party i18n library
+## Quick install
 
-## Run
+```bash
+git clone https://github.com/perejaslav/hermes-agent-dashboard.git
+cd hermes-agent-dashboard
+sudo ./install.sh
+```
 
-The dashboard is started as a systemd service:
+If Hermes is installed in a non-default Python path, provide it explicitly:
+
+```bash
+HERMES_PYTHON=/path/to/hermes-agent/venv/bin/python3 sudo ./install.sh
+```
+
+## After installation
+
+- service name: `hermes-dashboard`
+- port: `8420`
+- URL: `http://localhost:8420`
+
+Useful commands:
 
 ```bash
 sudo systemctl status hermes-dashboard
 sudo systemctl restart hermes-dashboard
+sudo journalctl -u hermes-dashboard -n 50
 ```
 
-Default port: `8420`
+## Uninstall
 
-## Project files
+```bash
+sudo ./uninstall.sh
+```
 
-- `hermes-dashboard.py` — the dashboard server and embedded UI
-- `README.md` — English overview
-- `README.ru.md` — Russian overview
+This removes the dashboard file and the systemd unit, but leaves Hermes data (`state.db`, sessions) untouched.
 
 ## Notes
 
-This dashboard is designed to be simple to maintain: one Python file, no extra dependencies, and all translation handled client-side.
+- All localization is client-side; no i18n library is needed.
+- The dashboard is a single Python file with embedded HTML/CSS/JS.
+- It uses Hermes Agent session data from the local machine only.
