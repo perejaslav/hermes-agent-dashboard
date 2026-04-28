@@ -707,8 +707,22 @@ def _fmt_num(n: float) -> str:
     return f"{n:.1f}" if n % 1 else f"{n:.0f}"
 
 
-def collect_alerts(days: int = 7) -> dict:
-    """Detect session and daily anomalies over the last `days` days."""
+def collect_alerts(days: int = 7, include_anomalies: bool = False) -> dict:
+    """Return dashboard alerts.
+
+    Statistical session anomalies are useful for diagnostics, but they are not
+    operational errors. Keep them opt-in so the header alert badge does not
+    present normal high-usage work sessions as broken dashboard state.
+    """
+    if not include_anomalies:
+        return {
+            "ok": True,
+            "days": days,
+            "alerts": [],
+            "summary": {"total_alerts": 0, "by_metric": {}},
+            "note": "Statistical anomaly insights are opt-in. Use include_anomalies=true to inspect them.",
+        }
+
     stats = collect_stats(days=days)
     sessions = stats.get("sessions", []) or []
 
@@ -949,8 +963,8 @@ async def api_trends(days: int = 7):
 
 
 @app.get("/api/alerts")
-async def api_alerts(days: int = 7):
-    return collect_alerts(days=days)
+async def api_alerts(days: int = 7, include_anomalies: bool = False):
+    return collect_alerts(days=days, include_anomalies=include_anomalies)
 
 
 @app.get("/api/session/{file_id}")
