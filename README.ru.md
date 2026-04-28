@@ -1,27 +1,37 @@
 # Hermes Agent Dashboard
 
-Hermes Agent Dashboard — это небольшой самодостаточный дашборд для уже установленного Hermes Agent.
-Он показывает аналитику сессий, использование токенов, распределение по моделям, инструменты, delegate-вызовы и другие live-метрики.
+Небольшой самодостаточный аналитический дашборд для [Hermes Agent](https://github.com/nousresearch/hermes-agent). Визуализирует сессии, токены, производительность моделей, вызовы инструментов, активность субагентов и временные паттерны — всё из локальной установки Hermes.
 
-## Что есть в репозитории
+## Возможности
 
-- `hermes-dashboard.py` — сервер дашборда и встроенный UI
-- `install.sh` — установка дашборда в существующий Hermes Agent
-- `uninstall.sh` — удаление установленных файлов и systemd-сервиса
-- `hermes-dashboard.service` — шаблон systemd unit, который использует установщик
-- `README.md` — описание на английском
+| Вкладка | Что показывает |
+|---------|---------------|
+| **Overview** | KPI-карточки, распределение моделей, топ инструментов, активность по дням, тренды токенов, scorecard моделей |
+| **Sessions** | Полная таблица сессий с поиском, сортировкой, pinning'ом, топ по длительности и токенам |
+| **Tools** | Частота инструментов, heatmap корреляции, почасовая активность, топ сессий по tool-вызовам |
+| **Subagents** | Дерево delegate'ов, распределение целей, toolsets субагентов, почасовая активность |
+| **Trends** | Сравнение периодов (текущий vs предыдущий), delta-бейджи, overlaid графики |
+| **Analytics** | Активность по часам, donut по платформам, stacked bar platform × hour |
+
+### Встроенные функции
+
+- **Real-time** — WebSocket push или polling каждые 30 секунд
+- **Глобальный поиск** — фильтрация по модели, платформе, инструменту, имени файла
+- **Pin сессий** — закрепление важных сессий (сохраняется в localStorage)
+- **Drill-down** — клик по сессии открывает полный timeline с ролями, tool calls, токенами
+- **Alert banner** — anomaly detection (>2σ) подсвечивает аномальные метрики
+- **CSV export** — скачивание таблиц sessions, duration, tokens
+- **Hotkeys** — `R` обновить, `/` поиск, `1–5` период
+- **i18n** — русский / английский интерфейс
 
 ## Требования
 
-Этот дашборд предназначен для человека, у которого уже установлен и работает Hermes Agent локально.
-Ожидается Hermes-окружение вроде:
-
-- `~/.hermes/state.db`
-- `~/.hermes/sessions/`
-- Python-окружение Hermes Agent на машине
+- Установленный Hermes Agent
+- `~/.hermes/state.db` (SQLite)
+- `~/.hermes/sessions/*.jsonl`
+- Python 3.11+ с FastAPI + uvicorn
 
 Отдельный backend или база данных не нужны.
-Дашборд читает локальное состояние Hermes напрямую.
 
 ## Быстрая установка
 
@@ -31,7 +41,7 @@ cd hermes-agent-dashboard
 sudo ./install.sh
 ```
 
-Если Hermes установлен не в стандартном пути Python, можно указать его явно:
+Если Hermes установлен не в стандартном пути:
 
 ```bash
 HERMES_PYTHON=/path/to/hermes-agent/venv/bin/python3 sudo ./install.sh
@@ -39,11 +49,9 @@ HERMES_PYTHON=/path/to/hermes-agent/venv/bin/python3 sudo ./install.sh
 
 ## После установки
 
-- имя сервиса: `hermes-dashboard`
-- порт: `8420`
-- адрес: `http://localhost:8420`
-
-Полезные команды:
+- **Сервис:** `hermes-dashboard`
+- **Порт:** `8420`
+- **Адрес:** `http://localhost:8420`
 
 ```bash
 sudo systemctl status hermes-dashboard
@@ -57,10 +65,15 @@ sudo journalctl -u hermes-dashboard -n 50
 sudo ./uninstall.sh
 ```
 
-Это удалит файл дашборда и systemd unit, но не тронет данные Hermes (`state.db`, sessions).
+Удаляет файл дашборда и systemd unit. Данные Hermes (`state.db`, sessions) не трогает.
 
-## Примечания
+## Архитектура
 
-- Локализация работает на стороне клиента, отдельная i18n-библиотека не нужна.
-- Дашборд — это один Python-файл со встроенными HTML/CSS/JS.
-- Он использует данные Hermes только с локальной машины.
+- **Один файл:** `hermes-dashboard.py` (~2600 строк) — FastAPI backend + inline HTML/CSS/JS
+- **Фронтенд:** vanilla JS + Chart.js 4.x (без build-шага)
+- **Источники данных:** SQLite `state.db` + JSONL файлы сессий
+- **Деплой:** systemd service с auto-restart
+
+## Лицензия
+
+MIT
