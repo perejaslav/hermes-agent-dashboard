@@ -670,6 +670,14 @@ def _mean_std(values: list[float]) -> tuple[float, float]:
     return mean, variance ** 0.5
 
 
+def _fmt_num(n: float) -> str:
+    if n >= 1_000_000:
+        return f"{n:,.0f}"
+    if n >= 1_000:
+        return f"{n:,.1f}" if n % 1 else f"{n:,.0f}"
+    return f"{n:.1f}" if n % 1 else f"{n:.0f}"
+
+
 def collect_alerts(days: int = 7) -> dict:
     """Detect session and daily anomalies over the last `days` days."""
     stats = collect_stats(days=days)
@@ -704,11 +712,11 @@ def collect_alerts(days: int = 7) -> dict:
             except (TypeError, ValueError):
                 continue
             z = (value_f - mean) / std
-            if abs(z) <= 2:
+            if abs(z) <= 3:
                 continue
-            severity = "high" if abs(z) > 3 else "medium"
+            severity = "high" if abs(z) > 4 else "medium"
             direction = "above" if z > 0 else "below"
-            message = f"Session {metric.replace('_', ' ')} {value_f:g} is {abs(z):.1f}σ {direction} average ({mean:.1f} ± {std:.1f})"
+            message = f"Session {metric.replace('_', ' ')} {_fmt_num(value_f)} is {abs(z):.1f}σ {direction} average ({_fmt_num(mean)} ± {_fmt_num(std)})"
             alerts.append({
                 "type": "anomaly",
                 "severity": severity,
@@ -735,10 +743,10 @@ def collect_alerts(days: int = 7) -> dict:
         if daily_std > 0:
             for day, count in sorted(day_counts.items()):
                 z = (count - daily_mean) / daily_std
-                if z > 2:
+                if z > 3:
                     alerts.append({
                         "type": "spike_day",
-                        "severity": "high" if z > 3 else "medium",
+                        "severity": "high" if z > 4 else "medium",
                         "metric": "sessions_per_day",
                         "day": day,
                         "value": count,
