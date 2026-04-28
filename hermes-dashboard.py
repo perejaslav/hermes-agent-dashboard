@@ -646,6 +646,7 @@ def collect_stats(days: int = 7) -> dict:
         "platform_hour": {p: dict(sorted(c.items())) for p, c in platform_hour.items()},
         "avg_response_time_sec": round(global_response_time_sum / global_response_time_n, 1) if global_response_time_n else None,
         "agent_breakdown": {"total_sessions": len(sessions), "direct_sessions": sum(1 for s in sessions if s["agent_type"] == "direct"), "sessions_with_subagents": sum(1 for s in sessions if s["agent_type"] == "main_with_subagents"), "total_delegate_calls": total_delegates, "total_subagent_tasks": subagent_tasks, "subagent_toolsets": dict(subagent_tool_counter.most_common())},
+        "generated_at": datetime.now().isoformat(),
     }
 
 
@@ -1652,7 +1653,7 @@ function renderAlerts() {
           <div class="alert-row-title">${esc(alert.metric || 'alert')}</div>
           <div class="alert-row-message">${esc(msg)}${(alert.message || '').length > 80 ? '…' : ''}</div>
           <div class="alert-row-meta">
-            <a class="alert-session-link" href="#" onclick="openSession(${JSON.stringify(session)}); return false;">${esc(alert.session_file || session)}</a>
+            <a class="alert-session-link" href="#" onclick="openSession('${esc(session)}'); return false;">${esc(alert.session_file || session)}</a>
           </div>
         </div>
         <button class="alert-dismiss" type="button" title="Dismiss" onclick="dismissAlert('${hash}')">×</button>
