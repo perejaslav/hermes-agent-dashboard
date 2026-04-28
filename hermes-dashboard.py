@@ -590,9 +590,9 @@ def collect_stats(days: int = 7) -> dict:
         token_by_day[day]["reasoning"] += reas
         token_by_day[day]["cost"] += cost
 
-        top_cost_sessions.append({"id": db_s.get("id"), "model": model, "started_at": started, "input_tokens": inp, "output_tokens": out, "cost": cost})
+        top_cost_sessions.append({"id": db_s.get("id"), "model": model, "started_at": datetime.fromtimestamp(started).strftime("%Y-%m-%d %H:%M") if started else "", "input_tokens": inp, "output_tokens": out, "cache_read_tokens": cr, "estimated_cost_usd": cost})
 
-    top_cost_sessions = sorted(top_cost_sessions, key=lambda x: x["cost"], reverse=True)[:10]
+    top_cost_sessions = sorted(top_cost_sessions, key=lambda x: x["estimated_cost_usd"], reverse=True)[:10]
     token_trend = []
     for i in range(days - 1, -1, -1):
         day = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
@@ -633,12 +633,41 @@ def collect_stats(days: int = 7) -> dict:
         if sid in meta:
             s["meta"] = meta[sid]
 
+    enriched_sessions = [{"file": s["file"], "model": s["model"], "platform": s["platform"], "user_msgs": s["user_msgs"], "assistant_msgs": s["assistant_msgs"], "tool_calls": s["tool_calls"], "delegate_calls": s["delegate_calls"], "duration_min": s["duration_min"], "mtime": s["mtime_str"], "agent_type": s["agent_type"], "input_tokens": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("input_tokens", 0), "output_tokens": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("output_tokens", 0), "cache_read_tokens": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("cache_read_tokens", 0), "estimated_cost_usd": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("estimated_cost_usd", 0)} for s in sessions]
+    enriched_by_duration = [{"file": s["file"], "model": s["model"], "platform": s["platform"], "user_msgs": s["user_msgs"], "assistant_msgs": s["assistant_msgs"], "tool_calls": s["tool_calls"], "delegate_calls": s["delegate_calls"], "duration_min": s["duration_min"], "mtime": s["mtime_str"], "agent_type": s["agent_type"], "input_tokens": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("input_tokens", 0), "output_tokens": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("output_tokens", 0), "cache_read_tokens": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("cache_read_tokens", 0), "estimated_cost_usd": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("estimated_cost_usd", 0)} for s in by_duration[:10]]
+
     return {
         "ok": True,
         "days": days,
-        "summary": {"sessions": len(sessions), "users": total_user_msgs, "tool_calls": total_tool_calls, "delegates": total_delegates},
+        "generated_at": datetime.now().isoformat(),
+        "summary": {
+            "sessions": len(sessions),
+            "users": total_user_msgs,
+            "user_messages": total_user_msgs,
+            "assistant_responses": total_messages["assistant"],
+            "tool_calls": total_tool_calls,
+            "delegates": total_delegates,
+            "delegate_calls": total_delegates,
+            "total_input_tokens": total_input,
+            "total_output_tokens": total_output,
+            "total_cache_read_tokens": total_cache_read,
+            "total_cache_write_tokens": total_cache_write,
+            "total_reasoning_tokens": total_reasoning,
+            "total_tokens": total_input + total_output + total_cache_read + total_cache_write + total_reasoning,
+            "estimated_cost_usd": round(total_cost, 4),
+            "cost_status": cost_status,
+        },
+        "by_model": dict(model_counter.most_common()),
+        "top_tools": dict(tool_counter.most_common(20)),
+        "by_day": dict(sorted(day_counter.items())),
+        "token_by_model": token_by_model,
+        "token_by_day": token_by_day,
+        "token_trend": token_trend,
+        "top_cost_sessions": top_cost_sessions,
+        "top_duration": enriched_by_duration,
+        "by_duration": enriched_by_duration,
         "delegates": all_delegates,
-        "sessions": [{"file": s["file"], "model": s["model"], "platform": s["platform"], "user_msgs": s["user_msgs"], "assistant_msgs": s["assistant_msgs"], "tool_calls": s["tool_calls"], "delegate_calls": s["delegate_calls"], "duration_min": s["duration_min"], "mtime": s["mtime_str"], "agent_type": s["agent_type"], "input_tokens": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("input_tokens", 0), "output_tokens": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("output_tokens", 0), "cache_read_tokens": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("cache_read_tokens", 0), "estimated_cost_usd": db_token_lookup.get(s["file"].replace(".jsonl", ""), {}).get("estimated_cost_usd", 0)} for s in sessions],
+        "sessions": enriched_sessions,
         "model_performance": model_performance,
         "by_hour": dict(sorted(hour_counter.items())),
         "by_dow": dict(dow_counter.most_common()),
@@ -646,7 +675,6 @@ def collect_stats(days: int = 7) -> dict:
         "platform_hour": {p: dict(sorted(c.items())) for p, c in platform_hour.items()},
         "avg_response_time_sec": round(global_response_time_sum / global_response_time_n, 1) if global_response_time_n else None,
         "agent_breakdown": {"total_sessions": len(sessions), "direct_sessions": sum(1 for s in sessions if s["agent_type"] == "direct"), "sessions_with_subagents": sum(1 for s in sessions if s["agent_type"] == "main_with_subagents"), "total_delegate_calls": total_delegates, "total_subagent_tasks": subagent_tasks, "subagent_toolsets": dict(subagent_tool_counter.most_common())},
-        "generated_at": datetime.now().isoformat(),
     }
 
 
