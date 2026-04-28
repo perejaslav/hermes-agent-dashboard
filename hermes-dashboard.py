@@ -1093,16 +1093,29 @@ body {
 .alert-dismiss { background:transparent; border:none; color:var(--text2); cursor:pointer; font-size:16px; line-height:1; padding:0 4px; }
 .alert-dismiss:hover { color: var(--text); }
 
-  display: flex; gap: 12px; margin-bottom: 20px; align-items: center;
+/* Toolbar */
+.controls {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin: -8px 0 16px;
+  padding: 10px;
+  width: fit-content; max-width: 100%;
+  background: linear-gradient(135deg, rgba(26,29,39,.92), rgba(36,40,54,.72));
+  border: 1px solid rgba(108,140,255,.16);
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.03);
 }
 .controls select, .controls button {
-  background: var(--surface2); color: var(--text); border: 1px solid var(--border);
-  padding: 6px 12px; border-radius: 6px; font-family: inherit; font-size: 12px;
-  cursor: pointer;
+  height: 34px;
+  background: rgba(15,17,23,.55); color: var(--text); border: 1px solid var(--border);
+  padding: 0 12px; border-radius: 10px; font-family: inherit; font-size: 12px;
+  cursor: pointer; outline: none; transition: all .15s ease;
 }
-.controls button:hover { border-color: var(--accent); }
-.lang-btn { font-size: 16px; padding: 2px 8px !important; }
-.flag-icon { display:inline-block; width:18px; height:12px; vertical-align:middle; border-radius:2px; border:1px solid rgba(255,255,255,.15); box-sizing:border-box; }
+.controls select:hover, .controls button:hover { border-color: rgba(108,140,255,.65); background: rgba(108,140,255,.10); transform: translateY(-1px); }
+.controls select:focus, .controls button:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,140,255,.14); }
+.refresh-btn { display:inline-flex; align-items:center; gap:7px; color:var(--text); }
+.refresh-btn .refresh-icon { color:var(--accent); font-size:14px; }
+.lang-btn { display:inline-flex; align-items:center; justify-content:center; width:36px; min-width:36px; padding:0 !important; }
+.flag-icon { display:inline-block; width:18px; height:12px; vertical-align:middle; border-radius:2px; border:1px solid rgba(255,255,255,.18); box-sizing:border-box; box-shadow:0 0 0 1px rgba(0,0,0,.2); }
 .flag-us {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 19 10'%3E%3Crect width='19' height='10' fill='%23fff'/%3E%3Cg fill='%23b22234'%3E%3Crect y='0' width='19' height='0.77'/%3E%3Crect y='1.54' width='19' height='0.77'/%3E%3Crect y='3.08' width='19' height='0.77'/%3E%3Crect y='4.62' width='19' height='0.77'/%3E%3Crect y='6.16' width='19' height='0.77'/%3E%3Crect y='7.69' width='19' height='0.77'/%3E%3Crect y='9.23' width='19' height='0.77'/%3E%3C/g%3E%3Crect width='8' height='5.38' fill='%233C3B6E'/%3E%3Cg fill='%23fff'%3E%3Cpolygon points='0.7,0.5 0.82,0.82 1.16,0.84 0.89,1.05 0.98,1.37 0.7,1.18 0.42,1.37 0.51,1.05 0.24,0.84 0.58,0.82'/%3E%3Cpolygon points='2.1,0.5 2.22,0.82 2.56,0.84 2.29,1.05 2.38,1.37 2.1,1.18 1.82,1.37 1.91,1.05 1.64,0.84 1.98,0.82'/%3E%3Cpolygon points='3.5,0.5 3.62,0.82 3.96,0.84 3.69,1.05 3.78,1.37 3.5,1.18 3.22,1.37 3.31,1.05 3.04,0.84 3.38,0.82'/%3E%3Cpolygon points='4.9,0.5 5.02,0.82 5.36,0.84 5.09,1.05 5.18,1.37 4.9,1.18 4.62,1.37 4.71,1.05 4.44,0.84 4.78,0.82'/%3E%3Cpolygon points='6.3,0.5 6.42,0.82 6.76,0.84 6.49,1.05 6.58,1.37 6.3,1.18 6.02,1.37 6.11,1.05 5.84,0.84 6.18,0.82'/%3E%3Cpolygon points='1.4,1.8 1.52,2.12 1.86,2.14 1.59,2.35 1.68,2.67 1.4,2.48 1.12,2.67 1.21,2.35 0.94,2.14 1.28,2.12'/%3E%3Cpolygon points='2.8,1.8 2.92,2.12 3.26,2.14 2.99,2.35 3.08,2.67 2.8,2.48 2.52,2.67 2.61,2.35 2.34,2.14 2.68,2.12'/%3E%3Cpolygon points='4.2,1.8 4.32,2.12 4.66,2.14 4.39,2.35 4.48,2.67 4.2,2.48 3.92,2.67 4.01,2.35 3.74,2.14 4.08,2.12'/%3E%3Cpolygon points='5.6,1.8 5.72,2.12 6.06,2.14 5.79,2.35 5.88,2.67 5.6,2.48 5.32,2.67 5.41,2.35 5.14,2.14 5.48,2.12'/%3E%3Cpolygon points='7.0,1.8 7.12,2.12 7.46,2.14 7.19,2.35 7.28,2.67 7.0,2.48 6.72,2.67 6.81,2.35 6.54,2.14 6.88,2.12'/%3E%3C/g%3E%3C/svg%3E");
   background-size: cover;
@@ -1110,7 +1123,27 @@ body {
   background-repeat: no-repeat;
 }
 .flag-ru { background: linear-gradient(to bottom, #fff 0 33.33%, #0c47b7 33.33% 66.66%, #d52b1e 66.66% 100%); }
-.last-update { font-size: 11px; color: var(--text2); margin-left: auto; display:flex; align-items:center; gap:8px; }
+.last-update {
+  height:34px; display:inline-flex; align-items:center; gap:8px;
+  padding:0 4px 0 12px;
+  border-left:1px solid rgba(255,255,255,.08);
+  font-size: 11px; color: var(--text2);
+  white-space: nowrap;
+}
+.search-row { display:flex; gap:8px; margin-bottom:16px; }
+.search-input {
+  flex:1; min-width:0;
+  background: linear-gradient(135deg, rgba(36,40,54,.88), rgba(26,29,39,.88));
+  color:var(--text); border:1px solid var(--border);
+  padding:9px 14px; border-radius:12px; font-family:inherit; font-size:12px;
+  outline:none; transition: all .15s ease;
+}
+.search-input:focus { border-color:rgba(108,140,255,.65); box-shadow:0 0 0 3px rgba(108,140,255,.12); }
+.search-input::placeholder { color:rgba(139,144,165,.78); }
+@media (max-width: 720px) {
+  .controls { width:100%; }
+  .last-update { width:100%; border-left:none; border-top:1px solid rgba(255,255,255,.08); padding:8px 0 0; height:auto; justify-content:space-between; }
+}
 
 .tab-bar {
   display: flex; gap: 4px; margin-bottom: 20px;
@@ -1303,16 +1336,15 @@ tr:hover td { background: var(--surface2); }
       <option value="14">14 дней</option>
       <option value="30">30 дней</option>
     </select>
-    <button onclick="refresh()">↻ <span data-i18n="btn_refresh">Обновить</span></button>
+    <button class="refresh-btn" onclick="refresh()"><span class="refresh-icon">↻</span><span data-i18n="btn_refresh">Обновить</span></button>
     <span class="last-update" id="last-update">
       <span id="last-update-text"></span>
       <button class="lang-btn" id="lang-btn" onclick="toggleLang()"></button>
     </span>
   </div>
 
-  <div style="display:flex;gap:8px;margin-bottom:16px;">
-    <input type="text" id="global-search" placeholder="🔍 Search sessions, models, tools, platforms..."
-      style="flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:12px;">
+  <div class="search-row">
+    <input type="text" id="global-search" class="search-input" placeholder="🔍 Search sessions, models, tools, platforms...">
   </div>
 
   <div class="tab-bar">
